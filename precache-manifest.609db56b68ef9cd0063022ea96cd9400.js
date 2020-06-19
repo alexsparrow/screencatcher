@@ -1,27 +1,27 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "46a96185ef5a66c24a2466e520bf20de",
+    "revision": "31afd52e90a372101a38ef8081ee5de3",
     "url": "/screen2gif/index.html"
   },
   {
-    "revision": "dfbaabe8e6396887397a",
+    "revision": "8a418d6601c452bbf594",
     "url": "/screen2gif/static/css/2.61537109.chunk.css"
   },
   {
-    "revision": "3508054081cf2610eb5b",
+    "revision": "e72ccf89d5a2a5206e5e",
     "url": "/screen2gif/static/css/main.5f361e03.chunk.css"
   },
   {
-    "revision": "dfbaabe8e6396887397a",
-    "url": "/screen2gif/static/js/2.975807f6.chunk.js"
+    "revision": "8a418d6601c452bbf594",
+    "url": "/screen2gif/static/js/2.030736d9.chunk.js"
   },
   {
     "revision": "0046c4337823700c38288e0c9d577e26",
-    "url": "/screen2gif/static/js/2.975807f6.chunk.js.LICENSE.txt"
+    "url": "/screen2gif/static/js/2.030736d9.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "3508054081cf2610eb5b",
-    "url": "/screen2gif/static/js/main.caac0003.chunk.js"
+    "revision": "e72ccf89d5a2a5206e5e",
+    "url": "/screen2gif/static/js/main.caadf9ab.chunk.js"
   },
   {
     "revision": "1b38110b0d864ea0f81b",
