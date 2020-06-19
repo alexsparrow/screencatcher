@@ -2,7 +2,18 @@ import React, { useState, useEffect } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import gifshot from "gifshot";
-import { Button, ProgressBar, Navbar, NavbarGroup, NavbarHeading, Alignment, NavbarDivider, AnchorButton, NonIdealState } from "@blueprintjs/core";
+import {
+  Button,
+  ProgressBar,
+  Navbar,
+  NavbarGroup,
+  NavbarHeading,
+  Alignment,
+  NavbarDivider,
+  AnchorButton,
+  NonIdealState,
+} from "@blueprintjs/core";
+import numeral from "numeral";
 
 async function captureDisplay(displayMediaOptions: any) {
   let captureStream = null;
@@ -34,7 +45,7 @@ const GifRenderer = ({
   screenWidth,
   screenHeight,
   onImageComplete,
-  onImageProgress
+  onImageProgress,
 }: {
   chunks: any[];
   startTime: number;
@@ -51,7 +62,7 @@ const GifRenderer = ({
   const framesPerSecond = 5;
   const frameDuration = 10.0 / framesPerSecond;
   const numFrames = Math.trunc((framesPerSecond * durationMillis) / 1000.0);
-  const interval = 1.0 / framesPerSecond; 
+  const interval = 1.0 / framesPerSecond;
 
   useEffect(() => {
     console.log("Rendering");
@@ -64,7 +75,7 @@ const GifRenderer = ({
         numFrames,
         interval,
         frameDuration,
-        progressCallback: onImageProgress
+        progressCallback: onImageProgress,
       },
       function (obj: any) {
         if (!obj.error) {
@@ -75,18 +86,20 @@ const GifRenderer = ({
     );
   }, [chunks]);
 
-  return (
-    <>
-    </>
-  );
+  return <></>;
 };
 
-const Video = ({ chunksUrl }: { chunksUrl:any }) => {
+const Video = ({ chunksUrl }: { chunksUrl: any }) => {
   return (
     <video
       autoPlay
       controls
-      style={{ height: "100%" }}
+      style={{
+        maxHeight: "100%",
+        height: "100%",
+        maxWidth: "100%",
+        width: "100%",
+      }}
       src={chunksUrl ? chunksUrl : undefined}
     />
   );
@@ -97,8 +110,10 @@ const App = () => {
   const [chunks, setChunks] = useState<any[]>([]);
   const [chunksUrl, setChunksUrl] = useState<string>("");
   const [recording, setRecording] = useState<boolean>(false);
+  const [converting, setConverting] = useState<boolean>(false);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [stopTime, setStopTime] = useState<number | null>(null);
+  const [currentTime, setCurrentTime] = useState<number>(Date.now());
   const [screenWidth, setScreenWidth] = useState<number | null>(null);
   const [screenHeight, setScreenHeight] = useState<number | null>(null);
   const [img, setImg] = useState<any>(null);
@@ -117,6 +132,7 @@ const App = () => {
 
     _mediaRecorder.onstop = (e: any) => {
       setRecording(false);
+      setConverting(true);
       setChunksUrl(URL.createObjectURL(chunks[0]));
       setScreenWidth(captureStream.getVideoTracks()[0].getSettings().width);
       setScreenHeight(captureStream.getVideoTracks()[0].getSettings().height);
@@ -131,6 +147,15 @@ const App = () => {
     mediaRecorder.stop();
     setStopTime(Date.now());
   };
+
+  useEffect(() => {
+    setTimeout(() => setCurrentTime(Date.now()), 1000);
+  }, [currentTime]);
+
+  const durationSecs =
+    ((stopTime ? stopTime : currentTime) -
+      (startTime ? startTime : currentTime)) /
+    1000.0;
 
   return (
     <div className="App">
@@ -149,25 +174,29 @@ const App = () => {
           </NavbarGroup>
 
           <NavbarGroup align={Alignment.RIGHT}>
-            {(progress != 1 || !img) && (
+            {converting && (
               <div style={{ width: "10rem" }}>
-                <ProgressBar value={progress} />
+                Converting to GIF <ProgressBar value={progress} />
               </div>
             )}
             {img && (
               <>
-                <img src={img} width={64} />
+                {img && img.length <= 1e6 && <img src={img} width={64} />}
                 <AnchorButton
                   download="screen2gif.gif"
                   href={img}
                   target="_blank"
+                  icon="download"
+                  loading={converting}
+                  disabled={!img}
                 >
                   Download GIF
                 </AnchorButton>
               </>
             )}
             <NavbarDivider />
-            Duration: {(stopTime! - startTime!) / 1000.0}s
+            Duration:{" "}
+            {numeral(durationSecs > 0 ? durationSecs : 0).format("0.0")}s
           </NavbarGroup>
         </Navbar>
 
@@ -207,7 +236,10 @@ const App = () => {
             stopTime={stopTime}
             screenWidth={screenWidth!}
             screenHeight={screenHeight!}
-            onImageComplete={setImg}
+            onImageComplete={(img: any) => {
+              setImg(img);
+              setConverting(false);
+            }}
             onImageProgress={setProgress}
           />
         )}
