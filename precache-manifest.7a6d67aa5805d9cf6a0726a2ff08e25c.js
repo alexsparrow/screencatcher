@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "27e3b0e9ed3f8ff988269dad54a6c099",
+    "revision": "626fcfe24ce4f79e907b5435820e328e",
     "url": "/screen2gif/index.html"
   },
   {
