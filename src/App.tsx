@@ -12,6 +12,7 @@ import {
   NavbarDivider,
   AnchorButton,
   NonIdealState,
+  Slider,
 } from "@blueprintjs/core";
 import numeral from "numeral";
 
@@ -46,6 +47,7 @@ const GifRenderer = ({
   screenHeight,
   onImageComplete,
   onImageProgress,
+  gifWidth
 }: {
   chunks: any[];
   startTime: number;
@@ -54,8 +56,8 @@ const GifRenderer = ({
   screenHeight: number;
   onImageComplete: any;
   onImageProgress: any;
+  gifWidth: number;
 }) => {
-  const gifWidth = 1024;
   const scaleFactor = gifWidth / screenWidth;
   const gifHeight = scaleFactor * screenHeight;
   const durationMillis = 1.0 * (stopTime - startTime);
@@ -114,6 +116,7 @@ const App = () => {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [stopTime, setStopTime] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(Date.now());
+  const [gifWidth, setGifWidth] = useState<number>(1024);
   const [screenWidth, setScreenWidth] = useState<number | null>(null);
   const [screenHeight, setScreenHeight] = useState<number | null>(null);
   const [img, setImg] = useState<any>(null);
@@ -171,6 +174,19 @@ const App = () => {
             <Button disabled={!recording} onClick={stopCapture} icon="stop">
               Stop
             </Button>
+
+            <NavbarDivider />
+            Width (px)
+            <div style={{ paddingLeft: "1rem" }}>
+              <Slider
+                min={256}
+                max={2048}
+                stepSize={256}
+                labelStepSize={512}
+                onChange={setGifWidth}
+                value={gifWidth}
+              />
+            </div>
           </NavbarGroup>
 
           <NavbarGroup align={Alignment.RIGHT}>
@@ -241,6 +257,7 @@ const App = () => {
               setConverting(false);
             }}
             onImageProgress={setProgress}
+            gifWidth={gifWidth}
           />
         )}
       </main>
