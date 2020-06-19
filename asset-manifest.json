@@ -1,0 +1,26 @@
+{
+  "files": {
+    "main.css": "/screen2gif/static/css/main.5f361e03.chunk.css",
+    "main.js": "/screen2gif/static/js/main.bf84c81f.chunk.js",
+    "main.js.map": "/screen2gif/static/js/main.bf84c81f.chunk.js.map",
+    "runtime-main.js": "/screen2gif/static/js/runtime-main.e2e4523f.js",
+    "runtime-main.js.map": "/screen2gif/static/js/runtime-main.e2e4523f.js.map",
+    "static/css/2.61537109.chunk.css": "/screen2gif/static/css/2.61537109.chunk.css",
+    "static/js/2.0d5c0a9e.chunk.js": "/screen2gif/static/js/2.0d5c0a9e.chunk.js",
+    "static/js/2.0d5c0a9e.chunk.js.map": "/screen2gif/static/js/2.0d5c0a9e.chunk.js.map",
+    "index.html": "/screen2gif/index.html",
+    "precache-manifest.6f1340b283f6811720593545af7fd937.js": "/screen2gif/precache-manifest.6f1340b283f6811720593545af7fd937.js",
+    "service-worker.js": "/screen2gif/service-worker.js",
+    "static/css/2.61537109.chunk.css.map": "/screen2gif/static/css/2.61537109.chunk.css.map",
+    "static/css/main.5f361e03.chunk.css.map": "/screen2gif/static/css/main.5f361e03.chunk.css.map",
+    "static/js/2.0d5c0a9e.chunk.js.LICENSE.txt": "/screen2gif/static/js/2.0d5c0a9e.chunk.js.LICENSE.txt",
+    "static/media/blueprint-icons.css": "/screen2gif/static/media/icons-20.cef8cdbb.woff"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.e2e4523f.js",
+    "static/css/2.61537109.chunk.css",
+    "static/js/2.0d5c0a9e.chunk.js",
+    "static/css/main.5f361e03.chunk.css",
+    "static/js/main.bf84c81f.chunk.js"
+  ]
+}
