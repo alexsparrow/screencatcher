@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from "react";
-import logo from "./logo.svg";
+import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
-import gifshot from "gifshot";
 import {
   Button,
   ProgressBar,
@@ -15,6 +13,10 @@ import {
   Slider,
 } from "@blueprintjs/core";
 import numeral from "numeral";
+import { exportPng } from "./export/exportPng";
+import { exportGif } from "./export/exportGif";
+import reactable from "reactablejs";
+import interact from "interactjs";
 
 async function captureDisplay(displayMediaOptions: any) {
   let captureStream = null;
@@ -30,7 +32,6 @@ async function captureDisplay(displayMediaOptions: any) {
 }
 
 declare var MediaRecorder: any;
-declare var ClipboardItem: any;
 
 const displayMediaOptions = {
   video: {
@@ -39,57 +40,7 @@ const displayMediaOptions = {
   audio: false,
 };
 
-const GifRenderer = ({
-  chunks,
-  startTime,
-  stopTime,
-  screenWidth,
-  screenHeight,
-  onImageComplete,
-  onImageProgress,
-  gifWidth
-}: {
-  chunks: any[];
-  startTime: number;
-  stopTime: number;
-  screenWidth: number;
-  screenHeight: number;
-  onImageComplete: any;
-  onImageProgress: any;
-  gifWidth: number;
-}) => {
-  const scaleFactor = gifWidth / screenWidth;
-  const gifHeight = scaleFactor * screenHeight;
-  const durationMillis = 1.0 * (stopTime - startTime);
-  const framesPerSecond = 5;
-  const frameDuration = 10.0 / framesPerSecond;
-  const numFrames = Math.trunc((framesPerSecond * durationMillis) / 1000.0);
-  const interval = 1.0 / framesPerSecond;
 
-  useEffect(() => {
-    console.log("Rendering");
-    onImageProgress(0);
-    gifshot.createGIF(
-      {
-        video: chunks,
-        gifWidth,
-        gifHeight,
-        numFrames,
-        interval,
-        frameDuration,
-        progressCallback: onImageProgress,
-      },
-      function (obj: any) {
-        if (!obj.error) {
-          var image = obj.image;
-          onImageComplete(image);
-        }
-      }
-    );
-  }, [chunks]);
-
-  return <></>;
-};
 
 const Video = ({ chunksUrl }: { chunksUrl: any }) => {
   return (
@@ -107,6 +58,103 @@ const Video = ({ chunksUrl }: { chunksUrl: any }) => {
   );
 };
 
+const Demo = (props: any) => (
+  <div
+    ref={props.getRef}
+    style={{
+      position: "absolute",
+      left: props.x,
+      top: props.y,
+      width: props.width,
+      height: props.height,
+      touchAction: "none",
+      borderWidth: 5,
+      borderColor: "red",
+      borderStyle: "solid",
+      pointerEvents: "all"
+    }}
+  >
+    <div style={{ width: "100%", height: "100%" }}>
+      {props.x},{props.y},{props.width},{props.height}{" "}
+      <Button onClick={() => props.onCrop([props.x, props.y, props.width, props.height])}>Crop</Button>
+    </div>
+  </div>
+);
+const Reactable = reactable(Demo);
+
+const useContainerDimensions = (myRef:any) => {
+  const getDimensions = () => ({
+    width: myRef.current.offsetWidth,
+    height: myRef.current.offsetHeight
+  })
+
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+
+  useEffect(() => {
+    const handleResize = () => {
+      setDimensions(getDimensions())
+    }
+
+    if (myRef.current) {
+      setDimensions(getDimensions())
+    }
+
+    window.addEventListener("resize", handleResize)
+
+    return () => {
+      window.removeEventListener("resize", handleResize)
+    }
+  }, [myRef])
+
+  return dimensions;
+};
+
+const ResizeDemo = ({ onCrop }: { onCrop: any }) => {
+  const [coordinate, setCoordinate] = React.useState({ x: 0, y: 0, width: 300, height: 200 });
+  return (
+    <Reactable
+      onCrop={onCrop}
+      resizable={{
+        edges: { left: true, right: true, bottom: true, top: true },
+        modifiers: [
+          interact.modifiers.restrictRect({
+            restriction: "parent",
+          }),
+        ],
+      }}
+      draggable={{
+        modifiers: [
+          interact.modifiers.restrictRect({
+            restriction: "parent",
+          }),
+        ],
+      }}
+      onDragMove={(event: any) =>
+        setCoordinate((prev: any) => ({
+          x: prev.x + event.dx,
+          y: prev.y + event.dy,
+          width: prev.width,
+          height: prev.height,
+        }))
+      }
+      onResizeMove={(e: any) => {
+        const { width, height } = e.rect;
+        const { left, top } = e.deltaRect;
+        setCoordinate((prev) => {
+          return {
+            x: prev.x + left,
+            y: prev.y + top,
+            width,
+            height,
+          };
+        });
+      }}
+      {...coordinate}
+    />
+  );
+};
+
+
 const App = () => {
   const [mediaRecorder, setMediaRecorder] = useState<any>(null);
   const [chunks, setChunks] = useState<any[]>([]);
@@ -119,8 +167,11 @@ const App = () => {
   const [gifWidth, setGifWidth] = useState<number>(1024);
   const [screenWidth, setScreenWidth] = useState<number | null>(null);
   const [screenHeight, setScreenHeight] = useState<number | null>(null);
-  const [img, setImg] = useState<any>(null);
+  const [gif, setGif] = useState<any>(null);
   const [progress, setProgress] = useState(0);
+  const [png, setPng] = useState<any>(null);
+  const [cropping, setCropping] = useState(false);
+  const [cropDimensions, setCropDimensions] = useState<null | number[]>();
 
   const startCapture = async () => {
     const captureStream = await captureDisplay(displayMediaOptions);
@@ -135,7 +186,6 @@ const App = () => {
 
     _mediaRecorder.onstop = (e: any) => {
       setRecording(false);
-      setConverting(true);
       setChunksUrl(URL.createObjectURL(chunks[0]));
       setScreenWidth(captureStream.getVideoTracks()[0].getSettings().width);
       setScreenHeight(captureStream.getVideoTracks()[0].getSettings().height);
@@ -151,6 +201,74 @@ const App = () => {
     setStopTime(Date.now());
   };
 
+  const videoRef = useRef();
+  const { width, height } = useContainerDimensions(videoRef);
+
+  const browserAspectRatio = width / height;
+  const videoAspectRatio = screenWidth! / screenHeight!;
+
+  let videoLeft = 0, videoTop = 0, videoWidth = width, videoHeight = height;
+
+  if (videoAspectRatio > browserAspectRatio) {
+    const scale = width / screenWidth!;
+    const scaledHeight = scale * screenHeight!;
+
+    videoTop = 0.5 * (height - scaledHeight);
+    videoHeight = scaledHeight;
+  } else if (browserAspectRatio > videoAspectRatio) {
+    const scale = height / screenHeight!;
+    const scaledWidth = scale * screenWidth!;
+
+    videoLeft = 0.5 * (width - scaledWidth);
+    videoWidth = scaledWidth;
+  }
+
+  console.log(videoLeft, videoTop, videoWidth, videoHeight);
+
+  const onExportPng = () => {
+    const vid = document.createElement("video");
+    vid.src = chunksUrl;
+    vid.width = screenWidth!;
+    vid.height = screenHeight!;
+    setConverting(true);
+
+    console.log(cropDimensions);
+    console.log(width);
+    console.log(screenWidth);
+    console.log(height);
+    console.log(screenHeight);
+
+    const scaleFactorX = 1.0 * screenWidth! / width;
+    const scaleFactorY = 1.0 * screenHeight! / height;
+
+    exportPng(
+      vid,
+      cropDimensions ? Math.round(cropDimensions[0] * scaleFactorX) : 0,
+      cropDimensions ? Math.round(cropDimensions[1] * scaleFactorY) : 0,
+      cropDimensions
+        ? Math.round(cropDimensions[2] * scaleFactorX)
+        : screenWidth!,
+      cropDimensions
+        ? Math.round(cropDimensions[3] * scaleFactorY)
+        : screenHeight!,
+      cropDimensions
+        ? Math.round(cropDimensions[2] * scaleFactorX)
+        : gifWidth,
+      cropDimensions
+        ? Math.round(cropDimensions[3] * scaleFactorY)
+        : (screenHeight! * gifWidth) / screenWidth!,
+      (png: any) => {
+        setConverting(false);
+        setPng(png);
+      }
+    );
+  };
+
+  const onCrop = (dimensions: number[]) => {
+    setCropDimensions(dimensions);
+    setCropping(false);
+  }
+
   useEffect(() => {
     setTimeout(() => setCurrentTime(Date.now()), 1000);
   }, [currentTime]);
@@ -159,6 +277,29 @@ const App = () => {
     ((stopTime ? stopTime : currentTime) -
       (startTime ? startTime : currentTime)) /
     1000.0;
+
+  const base64 = btoa(
+    new Uint8Array(png).reduce(
+      (data, byte) => data + String.fromCharCode(byte),
+      ""
+    )
+  );
+
+  const onExportGif = () => {
+    setConverting(true);
+    exportGif(chunks,
+            startTime!,
+            stopTime!,
+            screenWidth!,
+            screenHeight!,
+            (img: any) => {
+              setGif(img);
+              setConverting(false);
+            },
+            setProgress,
+            gifWidth
+    );
+  }
 
   return (
     <div className="App">
@@ -174,7 +315,6 @@ const App = () => {
             <Button disabled={!recording} onClick={stopCapture} icon="stop">
               Stop
             </Button>
-
             <NavbarDivider />
             Width (px)
             <div style={{ paddingLeft: "1rem" }}>
@@ -190,24 +330,46 @@ const App = () => {
           </NavbarGroup>
 
           <NavbarGroup align={Alignment.RIGHT}>
-            {converting && (
-              <div style={{ width: "10rem" }}>
-                Converting to GIF <ProgressBar value={progress} />
-              </div>
-            )}
-            {img && (
+            <Button onClick={() => setCropping(true)}>Crop (PNG Only)</Button>
+            <Button disabled={converting} onClick={onExportGif}>
+              Export (GIF)
+            </Button>
+            {gif && (
               <>
-                {img && img.length <= 1e6 && <img src={img} width={64} />}
                 <AnchorButton
                   download="screen2gif.gif"
-                  href={img}
+                  href={gif}
                   target="_blank"
                   icon="download"
-                  loading={converting}
-                  disabled={!img}
+                  disabled={!gif}
                 >
                   Download GIF
                 </AnchorButton>
+              </>
+            )}
+            <NavbarDivider />
+            <Button onClick={onExportPng} disabled={converting}>
+              Export (PNG)
+            </Button>
+            {png && (
+              <>
+                <AnchorButton
+                  download="screen2gif.png"
+                  href={`data:image/png;base64,${base64}`}
+                  target="_blank"
+                  icon="download"
+                  disabled={!png}
+                >
+                  Download PNG
+                </AnchorButton>
+              </>
+            )}
+            {converting && (
+              <>
+                <NavbarDivider />
+                <div style={{ width: "10rem" }}>
+                  <ProgressBar value={progress} />
+                </div>
               </>
             )}
             <NavbarDivider />
@@ -218,48 +380,58 @@ const App = () => {
 
         <div
           style={{
-            height: "calc(100vh - 75px)",
+            height: "calc(100vh - 50px)",
+            maxHeight: "calc(100vh - 50px)",
             width: "100vw",
+            maxWidth: "100vw",
+            padding: "1rem",
             backgroundColor: "#293742",
           }}
         >
-          {chunksUrl ? (
-            <Video chunksUrl={chunksUrl} />
-          ) : (
-            <NonIdealState
-              title="Nothing on tape yet"
-              description="Record something"
-              icon="warning-sign"
-              action={
-                !recording ? (
-                  <Button
-                    disabled={recording}
-                    onClick={startCapture}
-                    icon="record"
-                  >
-                    Record
-                  </Button>
-                ) : undefined
-              }
-            ></NonIdealState>
-          )}
-        </div>
-
-        {startTime && stopTime && screenWidth && screenHeight && (
-          <GifRenderer
-            chunks={chunks}
-            startTime={startTime}
-            stopTime={stopTime}
-            screenWidth={screenWidth!}
-            screenHeight={screenHeight!}
-            onImageComplete={(img: any) => {
-              setImg(img);
-              setConverting(false);
+          <div
+            style={{
+              width: "100%",
+              maxWidth: "100%",
+              height: "100%",
+              maxHeight: "100%",
+              position: "relative",
             }}
-            onImageProgress={setProgress}
-            gifWidth={gifWidth}
-          />
-        )}
+            ref={videoRef as any}
+          >
+            <div
+              style={{
+                position: "absolute",
+                left: videoLeft,
+                top: videoTop,
+                width: videoWidth,
+                height: videoHeight,
+                pointerEvents: "none",
+              }}
+            >
+              {cropping && <ResizeDemo onCrop={onCrop} />}
+            </div>
+            {chunksUrl ? (
+              <Video chunksUrl={chunksUrl} />
+            ) : (
+              <NonIdealState
+                title="Nothing on tape yet"
+                description="Record something"
+                icon="warning-sign"
+                action={
+                  !recording ? (
+                    <Button
+                      disabled={recording}
+                      onClick={startCapture}
+                      icon="record"
+                    >
+                      Record
+                    </Button>
+                  ) : undefined
+                }
+              ></NonIdealState>
+            )}
+          </div>
+        </div>
       </main>
     </div>
   );

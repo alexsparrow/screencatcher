@@ -12,11 +12,14 @@
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
     "gifshot": "^0.4.5",
+    "interactjs": "^1.9.19",
     "numeral": "^2.0.6",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
-    "typescript": "~3.7.2"
+    "reactablejs": "^0.2.0",
+    "typescript": "~3.7.2",
+    "upng-js": "^2.1.0"
   },
   "scripts": {
     "start": "react-scripts start",
