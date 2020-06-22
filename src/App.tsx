@@ -11,6 +11,11 @@ import {
   AnchorButton,
   NonIdealState,
   Slider,
+  Popover,
+  Position,
+  Menu,
+  MenuItem,
+  MenuDivider,
 } from "@blueprintjs/core";
 import numeral from "numeral";
 import { exportPng } from "./export/exportPng";
@@ -39,8 +44,6 @@ const displayMediaOptions = {
   },
   audio: false,
 };
-
-
 
 const Video = ({ chunksUrl }: { chunksUrl: any }) => {
   return (
@@ -71,49 +74,62 @@ const Demo = (props: any) => (
       borderWidth: 5,
       borderColor: "red",
       borderStyle: "solid",
-      pointerEvents: "all"
+      pointerEvents: "all",
     }}
   >
     <div style={{ width: "100%", height: "100%" }}>
       {props.x},{props.y},{props.width},{props.height}{" "}
-      <Button onClick={() => props.onCrop([props.x, props.y, props.width, props.height])}>Crop</Button>
+      <Button
+        onClick={() =>
+          props.onCrop([props.x, props.y, props.width, props.height])
+        }
+      >
+        Crop
+      </Button>
+      <Button onClick={() => props.onCropCancel()}>Cancel</Button>
     </div>
   </div>
 );
 const Reactable = reactable(Demo);
 
-const useContainerDimensions = (myRef:any) => {
+const useContainerDimensions = (myRef: any) => {
   const getDimensions = () => ({
     width: myRef.current.offsetWidth,
-    height: myRef.current.offsetHeight
-  })
+    height: myRef.current.offsetHeight,
+  });
 
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     const handleResize = () => {
-      setDimensions(getDimensions())
-    }
+      setDimensions(getDimensions());
+    };
 
     if (myRef.current) {
-      setDimensions(getDimensions())
+      setDimensions(getDimensions());
     }
 
-    window.addEventListener("resize", handleResize)
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize)
-    }
-  }, [myRef])
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [myRef]);
 
   return dimensions;
 };
 
-const ResizeDemo = ({ onCrop }: { onCrop: any }) => {
-  const [coordinate, setCoordinate] = React.useState({ x: 0, y: 0, width: 300, height: 200 });
+const ResizeDemo = ({ onCrop, onCancel }: { onCrop: any; onCancel: any; }) => {
+  const [coordinate, setCoordinate] = React.useState({
+    x: 0,
+    y: 0,
+    width: 300,
+    height: 200,
+  });
   return (
     <Reactable
       onCrop={onCrop}
+      onCropCancel={onCancel}
       resizable={{
         edges: { left: true, right: true, bottom: true, top: true },
         modifiers: [
@@ -154,6 +170,134 @@ const ResizeDemo = ({ onCrop }: { onCrop: any }) => {
   );
 };
 
+const Toolbar = ({
+  recording,
+  converting,
+  startCapture,
+  stopCapture,
+  setGifWidth,
+  gifWidth,
+  setCropping,
+  durationSecs,
+  onExportGif,
+  onExportPng,
+  gif,
+  png,
+  progress,
+}: {
+  recording: boolean;
+  converting: boolean;
+  startCapture: any;
+  stopCapture: any;
+  setGifWidth: any;
+  gifWidth: number;
+  setCropping: any;
+  durationSecs: number;
+  onExportGif: any;
+  onExportPng: any;
+  gif: any;
+  png: any;
+  progress: number;
+}) => {
+  const base64 = btoa(
+    new Uint8Array(png).reduce(
+      (data, byte) => data + String.fromCharCode(byte),
+      ""
+    )
+  );
+
+  const imageWidths = [256, 512, 1024, 2048];
+
+  return (
+    <Navbar>
+      <NavbarGroup>
+        <NavbarHeading>
+          <h3>screen2gif</h3>
+        </NavbarHeading>
+        <Button disabled={recording} onClick={startCapture} icon="record">
+          Record
+        </Button>
+        <Button disabled={!recording} onClick={stopCapture} icon="stop">
+          Stop
+        </Button>
+      </NavbarGroup>
+
+      <NavbarGroup align={Alignment.RIGHT}>
+        <Button icon="zoom-to-fit" onClick={() => setCropping(true)}>
+          Crop (PNG Only)
+        </Button>
+        <NavbarDivider />
+        <Popover
+          minimal
+          content={
+            <Menu>
+              <MenuItem
+                text="Export to PNG"
+                disabled={converting}
+                onClick={onExportPng}
+              />
+              <MenuItem
+                text="Export to GIF"
+                disabled={converting}
+                onClick={onExportGif}
+              />
+              <MenuDivider />
+
+              <MenuItem text="Image Width">
+                {imageWidths.map((width: number) => (
+                  <MenuItem
+                    text={`${width}`}
+                    icon={gifWidth === width ? "tick" : null}
+                    onClick={() => setGifWidth(width)}
+                  />
+                ))}
+              </MenuItem>
+            </Menu>
+          }
+        >
+          <Button icon="export" text="Export..." />
+        </Popover>
+        {(png || gif) && (
+          <Popover
+            minimal
+            content={
+              <Menu>
+                <MenuItem
+                  text="Download PNG"
+                  download="screen2gif.png"
+                  href={`data:image/png;base64,${base64}`}
+                  target="_blank"
+                  icon="download"
+                  disabled={!png}
+                />
+                <MenuItem
+                  text="Download GIF"
+                  download="screen2gif.gif"
+                  href={gif}
+                  target="_blank"
+                  icon="download"
+                  disabled={!gif}
+                />
+              </Menu>
+            }
+          >
+            <Button icon="download" text="Download..." />
+          </Popover>
+        )}
+        {converting && (
+          <>
+            <NavbarDivider />
+            <div style={{ width: "10rem" }}>
+              <ProgressBar value={progress} />
+            </div>
+          </>
+        )}
+        <NavbarDivider />
+        Duration: {numeral(durationSecs > 0 ? durationSecs : 0).format("0.0")}s
+      </NavbarGroup>
+    </Navbar>
+  );
+};
 
 const App = () => {
   const [mediaRecorder, setMediaRecorder] = useState<any>(null);
@@ -207,7 +351,10 @@ const App = () => {
   const browserAspectRatio = width / height;
   const videoAspectRatio = screenWidth! / screenHeight!;
 
-  let videoLeft = 0, videoTop = 0, videoWidth = width, videoHeight = height;
+  let videoLeft = 0,
+    videoTop = 0,
+    videoWidth = width,
+    videoHeight = height;
 
   if (videoAspectRatio > browserAspectRatio) {
     const scale = width / screenWidth!;
@@ -238,8 +385,8 @@ const App = () => {
     console.log(height);
     console.log(screenHeight);
 
-    const scaleFactorX = 1.0 * screenWidth! / width;
-    const scaleFactorY = 1.0 * screenHeight! / height;
+    const scaleFactorX = (1.0 * screenWidth!) / width;
+    const scaleFactorY = (1.0 * screenHeight!) / height;
 
     exportPng(
       vid,
@@ -251,9 +398,7 @@ const App = () => {
       cropDimensions
         ? Math.round(cropDimensions[3] * scaleFactorY)
         : screenHeight!,
-      cropDimensions
-        ? Math.round(cropDimensions[2] * scaleFactorX)
-        : gifWidth,
+      cropDimensions ? Math.round(cropDimensions[2] * scaleFactorX) : gifWidth,
       cropDimensions
         ? Math.round(cropDimensions[3] * scaleFactorY)
         : (screenHeight! * gifWidth) / screenWidth!,
@@ -267,6 +412,10 @@ const App = () => {
   const onCrop = (dimensions: number[]) => {
     setCropDimensions(dimensions);
     setCropping(false);
+  };
+
+  const onCropCancel = () => {
+    setCropping(false);
   }
 
   useEffect(() => {
@@ -278,106 +427,41 @@ const App = () => {
       (startTime ? startTime : currentTime)) /
     1000.0;
 
-  const base64 = btoa(
-    new Uint8Array(png).reduce(
-      (data, byte) => data + String.fromCharCode(byte),
-      ""
-    )
-  );
-
   const onExportGif = () => {
     setConverting(true);
-    exportGif(chunks,
-            startTime!,
-            stopTime!,
-            screenWidth!,
-            screenHeight!,
-            (img: any) => {
-              setGif(img);
-              setConverting(false);
-            },
-            setProgress,
-            gifWidth
+    exportGif(
+      chunks,
+      startTime!,
+      stopTime!,
+      screenWidth!,
+      screenHeight!,
+      (img: any) => {
+        setGif(img);
+        setConverting(false);
+      },
+      setProgress,
+      gifWidth
     );
-  }
+  };
 
   return (
     <div className="App">
       <main className="bp3-dark">
-        <Navbar>
-          <NavbarGroup>
-            <NavbarHeading>
-              <h3>screen2gif</h3>
-            </NavbarHeading>
-            <Button disabled={recording} onClick={startCapture} icon="record">
-              Record
-            </Button>
-            <Button disabled={!recording} onClick={stopCapture} icon="stop">
-              Stop
-            </Button>
-            <NavbarDivider />
-            Width (px)
-            <div style={{ paddingLeft: "1rem" }}>
-              <Slider
-                min={256}
-                max={2048}
-                stepSize={256}
-                labelStepSize={512}
-                onChange={setGifWidth}
-                value={gifWidth}
-              />
-            </div>
-          </NavbarGroup>
-
-          <NavbarGroup align={Alignment.RIGHT}>
-            <Button onClick={() => setCropping(true)}>Crop (PNG Only)</Button>
-            <Button disabled={converting} onClick={onExportGif}>
-              Export (GIF)
-            </Button>
-            {gif && (
-              <>
-                <AnchorButton
-                  download="screen2gif.gif"
-                  href={gif}
-                  target="_blank"
-                  icon="download"
-                  disabled={!gif}
-                >
-                  Download GIF
-                </AnchorButton>
-              </>
-            )}
-            <NavbarDivider />
-            <Button onClick={onExportPng} disabled={converting}>
-              Export (PNG)
-            </Button>
-            {png && (
-              <>
-                <AnchorButton
-                  download="screen2gif.png"
-                  href={`data:image/png;base64,${base64}`}
-                  target="_blank"
-                  icon="download"
-                  disabled={!png}
-                >
-                  Download PNG
-                </AnchorButton>
-              </>
-            )}
-            {converting && (
-              <>
-                <NavbarDivider />
-                <div style={{ width: "10rem" }}>
-                  <ProgressBar value={progress} />
-                </div>
-              </>
-            )}
-            <NavbarDivider />
-            Duration:{" "}
-            {numeral(durationSecs > 0 ? durationSecs : 0).format("0.0")}s
-          </NavbarGroup>
-        </Navbar>
-
+        <Toolbar
+          converting={converting}
+          durationSecs={durationSecs}
+          gif={gif}
+          gifWidth={gifWidth}
+          onExportGif={onExportGif}
+          onExportPng={onExportPng}
+          png={png}
+          progress={progress}
+          recording={recording}
+          setCropping={setCropping}
+          setGifWidth={setGifWidth}
+          startCapture={startCapture}
+          stopCapture={stopCapture}
+        />
         <div
           style={{
             height: "calc(100vh - 50px)",
@@ -408,7 +492,9 @@ const App = () => {
                 pointerEvents: "none",
               }}
             >
-              {cropping && <ResizeDemo onCrop={onCrop} />}
+              {cropping && (
+                <ResizeDemo onCrop={onCrop} onCancel={onCropCancel} />
+              )}
             </div>
             {chunksUrl ? (
               <Video chunksUrl={chunksUrl} />
