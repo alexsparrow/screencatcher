@@ -22,21 +22,11 @@ export const exportPng = (
   let frames: any[] = [];
   let dels: number[] = [];
 
-  console.log(x);
-  console.log(y);
-  console.log(width);
-  console.log(height);
-
-  console.log(targetWidth);
-  console.log(targetHeight);
-
   const capture = () => {
     const timeSinceLastFrame = Date.now() - lastTime;
-    console.log(Date.now() - startTime);
     if (timeSinceLastFrame > interval) {
       context?.drawImage(video, x, y, width, height, 0, 0, targetWidth, targetHeight);
       const imageData = context?.getImageData(0, 0, targetWidth, targetHeight);
-      // console.log(canvas.toDataURL('image/png'));
       lastTime = Date.now();
 
       frames.push(imageData?.data);

@@ -1,27 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
-import {
-  Button,
-  ProgressBar,
-  Navbar,
-  NavbarGroup,
-  NavbarHeading,
-  Alignment,
-  NavbarDivider,
-  AnchorButton,
-  NonIdealState,
-  Slider,
-  Popover,
-  Position,
-  Menu,
-  MenuItem,
-  MenuDivider,
-} from "@blueprintjs/core";
-import numeral from "numeral";
+import { Button, NonIdealState } from "@blueprintjs/core";
 import { exportPng } from "./export/exportPng";
 import { exportGif } from "./export/exportGif";
-import reactable from "reactablejs";
-import interact from "interactjs";
+import { Toolbar } from "./components/Toolbar";
+import { useContainerDimensions } from "./utils/useContainerDimensions";
+import { Cropper } from "./components/Cropper";
+import { Video } from "./components/Video";
 
 async function captureDisplay(displayMediaOptions: any) {
   let captureStream = null;
@@ -36,267 +21,11 @@ async function captureDisplay(displayMediaOptions: any) {
   return captureStream;
 }
 
-declare var MediaRecorder: any;
-
 const displayMediaOptions = {
   video: {
     cursor: "always",
   },
   audio: false,
-};
-
-const Video = ({ chunksUrl }: { chunksUrl: any }) => {
-  return (
-    <video
-      autoPlay
-      controls
-      style={{
-        maxHeight: "100%",
-        height: "100%",
-        maxWidth: "100%",
-        width: "100%",
-      }}
-      src={chunksUrl ? chunksUrl : undefined}
-    />
-  );
-};
-
-const Demo = (props: any) => (
-  <div
-    ref={props.getRef}
-    style={{
-      position: "absolute",
-      left: props.x,
-      top: props.y,
-      width: props.width,
-      height: props.height,
-      touchAction: "none",
-      borderWidth: 5,
-      borderColor: "red",
-      borderStyle: "solid",
-      pointerEvents: "all",
-    }}
-  >
-    <div style={{ width: "100%", height: "100%" }}>
-      {props.x},{props.y},{props.width},{props.height}{" "}
-      <Button
-        onClick={() =>
-          props.onCrop([props.x, props.y, props.width, props.height])
-        }
-      >
-        Crop
-      </Button>
-      <Button onClick={() => props.onCropCancel()}>Cancel</Button>
-    </div>
-  </div>
-);
-const Reactable = reactable(Demo);
-
-const useContainerDimensions = (myRef: any) => {
-  const getDimensions = () => ({
-    width: myRef.current.offsetWidth,
-    height: myRef.current.offsetHeight,
-  });
-
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-
-  useEffect(() => {
-    const handleResize = () => {
-      setDimensions(getDimensions());
-    };
-
-    if (myRef.current) {
-      setDimensions(getDimensions());
-    }
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [myRef]);
-
-  return dimensions;
-};
-
-const ResizeDemo = ({ onCrop, onCancel }: { onCrop: any; onCancel: any; }) => {
-  const [coordinate, setCoordinate] = React.useState({
-    x: 0,
-    y: 0,
-    width: 300,
-    height: 200,
-  });
-  return (
-    <Reactable
-      onCrop={onCrop}
-      onCropCancel={onCancel}
-      resizable={{
-        edges: { left: true, right: true, bottom: true, top: true },
-        modifiers: [
-          interact.modifiers.restrictRect({
-            restriction: "parent",
-          }),
-        ],
-      }}
-      draggable={{
-        modifiers: [
-          interact.modifiers.restrictRect({
-            restriction: "parent",
-          }),
-        ],
-      }}
-      onDragMove={(event: any) =>
-        setCoordinate((prev: any) => ({
-          x: prev.x + event.dx,
-          y: prev.y + event.dy,
-          width: prev.width,
-          height: prev.height,
-        }))
-      }
-      onResizeMove={(e: any) => {
-        const { width, height } = e.rect;
-        const { left, top } = e.deltaRect;
-        setCoordinate((prev) => {
-          return {
-            x: prev.x + left,
-            y: prev.y + top,
-            width,
-            height,
-          };
-        });
-      }}
-      {...coordinate}
-    />
-  );
-};
-
-const Toolbar = ({
-  recording,
-  converting,
-  startCapture,
-  stopCapture,
-  setGifWidth,
-  gifWidth,
-  setCropping,
-  durationSecs,
-  onExportGif,
-  onExportPng,
-  gif,
-  png,
-  progress,
-}: {
-  recording: boolean;
-  converting: boolean;
-  startCapture: any;
-  stopCapture: any;
-  setGifWidth: any;
-  gifWidth: number;
-  setCropping: any;
-  durationSecs: number;
-  onExportGif: any;
-  onExportPng: any;
-  gif: any;
-  png: any;
-  progress: number;
-}) => {
-  const base64 = btoa(
-    new Uint8Array(png).reduce(
-      (data, byte) => data + String.fromCharCode(byte),
-      ""
-    )
-  );
-
-  const imageWidths = [256, 512, 1024, 2048];
-
-  return (
-    <Navbar>
-      <NavbarGroup>
-        <NavbarHeading>
-          <h3>screen2gif</h3>
-        </NavbarHeading>
-        <Button disabled={recording} onClick={startCapture} icon="record">
-          Record
-        </Button>
-        <Button disabled={!recording} onClick={stopCapture} icon="stop">
-          Stop
-        </Button>
-      </NavbarGroup>
-
-      <NavbarGroup align={Alignment.RIGHT}>
-        <Button icon="zoom-to-fit" onClick={() => setCropping(true)}>
-          Crop (PNG Only)
-        </Button>
-        <NavbarDivider />
-        <Popover
-          minimal
-          content={
-            <Menu>
-              <MenuItem
-                text="Export to PNG"
-                disabled={converting}
-                onClick={onExportPng}
-              />
-              <MenuItem
-                text="Export to GIF"
-                disabled={converting}
-                onClick={onExportGif}
-              />
-              <MenuDivider />
-
-              <MenuItem text="Image Width">
-                {imageWidths.map((width: number) => (
-                  <MenuItem
-                    text={`${width}`}
-                    icon={gifWidth === width ? "tick" : null}
-                    onClick={() => setGifWidth(width)}
-                  />
-                ))}
-              </MenuItem>
-            </Menu>
-          }
-        >
-          <Button icon="export" text="Export..." />
-        </Popover>
-        {(png || gif) && (
-          <Popover
-            minimal
-            content={
-              <Menu>
-                <MenuItem
-                  text="Download PNG"
-                  download="screen2gif.png"
-                  href={`data:image/png;base64,${base64}`}
-                  target="_blank"
-                  icon="download"
-                  disabled={!png}
-                />
-                <MenuItem
-                  text="Download GIF"
-                  download="screen2gif.gif"
-                  href={gif}
-                  target="_blank"
-                  icon="download"
-                  disabled={!gif}
-                />
-              </Menu>
-            }
-          >
-            <Button icon="download" text="Download..." />
-          </Popover>
-        )}
-        {converting && (
-          <>
-            <NavbarDivider />
-            <div style={{ width: "10rem" }}>
-              <ProgressBar value={progress} />
-            </div>
-          </>
-        )}
-        <NavbarDivider />
-        Duration: {numeral(durationSecs > 0 ? durationSecs : 0).format("0.0")}s
-      </NavbarGroup>
-    </Navbar>
-  );
 };
 
 const App = () => {
@@ -328,7 +57,7 @@ const App = () => {
         return existing;
       });
 
-    _mediaRecorder.onstop = (e: any) => {
+    _mediaRecorder.onstop = () => {
       setRecording(false);
       setChunksUrl(URL.createObjectURL(chunks[0]));
       setScreenWidth(captureStream.getVideoTracks()[0].getSettings().width);
@@ -379,12 +108,6 @@ const App = () => {
     vid.height = screenHeight!;
     setConverting(true);
 
-    console.log(cropDimensions);
-    console.log(width);
-    console.log(screenWidth);
-    console.log(height);
-    console.log(screenHeight);
-
     const scaleFactorX = (1.0 * screenWidth!) / width;
     const scaleFactorY = (1.0 * screenHeight!) / height;
 
@@ -416,7 +139,7 @@ const App = () => {
 
   const onCropCancel = () => {
     setCropping(false);
-  }
+  };
 
   useEffect(() => {
     setTimeout(() => setCurrentTime(Date.now()), 1000);
@@ -492,9 +215,7 @@ const App = () => {
                 pointerEvents: "none",
               }}
             >
-              {cropping && (
-                <ResizeDemo onCrop={onCrop} onCancel={onCropCancel} />
-              )}
+              {cropping && <Cropper onCrop={onCrop} onCancel={onCropCancel} />}
             </div>
             {chunksUrl ? (
               <Video chunksUrl={chunksUrl} />

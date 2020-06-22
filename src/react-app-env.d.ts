@@ -9,3 +9,5 @@ declare module 'upng-js' {
   var x: any;
   export = x;
 }
+
+declare var MediaRecorder: any;
