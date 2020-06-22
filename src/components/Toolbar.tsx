@@ -56,7 +56,7 @@ export const Toolbar = ({
     <Navbar>
       <NavbarGroup>
         <NavbarHeading>
-          <h3>screen2gif</h3>
+          <h3>screencatcher</h3>
         </NavbarHeading>
         <Button disabled={recording} onClick={startCapture} icon="record">
           Record
@@ -108,7 +108,7 @@ export const Toolbar = ({
               <Menu>
                 <MenuItem
                   text="Download PNG"
-                  download="screen2gif.png"
+                  download="screencatcher.png"
                   href={`data:image/png;base64,${base64}`}
                   target="_blank"
                   icon="download"
@@ -116,7 +116,7 @@ export const Toolbar = ({
                 />
                 <MenuItem
                   text="Download GIF"
-                  download="screen2gif.gif"
+                  download="screencatcher.gif"
                   href={gif}
                   target="_blank"
                   icon="download"
