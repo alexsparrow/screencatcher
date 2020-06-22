@@ -1,26 +1,26 @@
 {
   "files": {
-    "main.css": "/screen2gif/static/css/main.5f361e03.chunk.css",
-    "main.js": "/screen2gif/static/js/main.8bd3a34b.chunk.js",
-    "main.js.map": "/screen2gif/static/js/main.8bd3a34b.chunk.js.map",
-    "runtime-main.js": "/screen2gif/static/js/runtime-main.e2e4523f.js",
-    "runtime-main.js.map": "/screen2gif/static/js/runtime-main.e2e4523f.js.map",
-    "static/css/2.61537109.chunk.css": "/screen2gif/static/css/2.61537109.chunk.css",
-    "static/js/2.9992632e.chunk.js": "/screen2gif/static/js/2.9992632e.chunk.js",
-    "static/js/2.9992632e.chunk.js.map": "/screen2gif/static/js/2.9992632e.chunk.js.map",
-    "index.html": "/screen2gif/index.html",
-    "precache-manifest.c891dd5ff0ce5b7238287d3d1ff374fc.js": "/screen2gif/precache-manifest.c891dd5ff0ce5b7238287d3d1ff374fc.js",
-    "service-worker.js": "/screen2gif/service-worker.js",
-    "static/css/2.61537109.chunk.css.map": "/screen2gif/static/css/2.61537109.chunk.css.map",
-    "static/css/main.5f361e03.chunk.css.map": "/screen2gif/static/css/main.5f361e03.chunk.css.map",
-    "static/js/2.9992632e.chunk.js.LICENSE.txt": "/screen2gif/static/js/2.9992632e.chunk.js.LICENSE.txt",
-    "static/media/blueprint-icons.css": "/screen2gif/static/media/icons-20.cef8cdbb.woff"
+    "main.css": "/screencatcher/static/css/main.5f361e03.chunk.css",
+    "main.js": "/screencatcher/static/js/main.9ff54626.chunk.js",
+    "main.js.map": "/screencatcher/static/js/main.9ff54626.chunk.js.map",
+    "runtime-main.js": "/screencatcher/static/js/runtime-main.91b547df.js",
+    "runtime-main.js.map": "/screencatcher/static/js/runtime-main.91b547df.js.map",
+    "static/css/2.2fa635ab.chunk.css": "/screencatcher/static/css/2.2fa635ab.chunk.css",
+    "static/js/2.f2faafb9.chunk.js": "/screencatcher/static/js/2.f2faafb9.chunk.js",
+    "static/js/2.f2faafb9.chunk.js.map": "/screencatcher/static/js/2.f2faafb9.chunk.js.map",
+    "index.html": "/screencatcher/index.html",
+    "precache-manifest.8674d59bbb7494d7d4c5c2aa0fe88d98.js": "/screencatcher/precache-manifest.8674d59bbb7494d7d4c5c2aa0fe88d98.js",
+    "service-worker.js": "/screencatcher/service-worker.js",
+    "static/css/2.2fa635ab.chunk.css.map": "/screencatcher/static/css/2.2fa635ab.chunk.css.map",
+    "static/css/main.5f361e03.chunk.css.map": "/screencatcher/static/css/main.5f361e03.chunk.css.map",
+    "static/js/2.f2faafb9.chunk.js.LICENSE.txt": "/screencatcher/static/js/2.f2faafb9.chunk.js.LICENSE.txt",
+    "static/media/blueprint-icons.css": "/screencatcher/static/media/icons-20.cef8cdbb.woff"
   },
   "entrypoints": [
-    "static/js/runtime-main.e2e4523f.js",
-    "static/css/2.61537109.chunk.css",
-    "static/js/2.9992632e.chunk.js",
+    "static/js/runtime-main.91b547df.js",
+    "static/css/2.2fa635ab.chunk.css",
+    "static/js/2.f2faafb9.chunk.js",
     "static/css/main.5f361e03.chunk.css",
-    "static/js/main.8bd3a34b.chunk.js"
+    "static/js/main.9ff54626.chunk.js"
   ]
 }
