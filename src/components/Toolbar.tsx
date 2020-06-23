@@ -13,38 +13,29 @@ import {
   MenuDivider,
 } from "@blueprintjs/core";
 import numeral from "numeral";
+import { State, Action } from "../state";
 
 export const Toolbar = ({
-  recording,
-  converting,
+  state,
+  dispatch,
   startCapture,
   stopCapture,
-  setGifWidth,
-  gifWidth,
-  setCropping,
   durationSecs,
   onExportGif,
   onExportPng,
-  gif,
-  png,
   progress,
 }: {
-  recording: boolean;
-  converting: boolean;
+  state: State;
+  dispatch: React.Dispatch<Action>;
   startCapture: any;
   stopCapture: any;
-  setGifWidth: any;
-  gifWidth: number;
-  setCropping: any;
   durationSecs: number;
   onExportGif: any;
   onExportPng: any;
-  gif: any;
-  png: any;
   progress: number;
 }) => {
   const base64 = btoa(
-    new Uint8Array(png).reduce(
+    new Uint8Array(state.png).reduce(
       (data, byte) => data + String.fromCharCode(byte),
       ""
     )
@@ -58,16 +49,23 @@ export const Toolbar = ({
         <NavbarHeading>
           <h3>screencatcher</h3>
         </NavbarHeading>
-        <Button disabled={recording} onClick={startCapture} icon="record">
+        <Button
+          disabled={state.isRecording}
+          onClick={startCapture}
+          icon="record"
+        >
           Record
         </Button>
-        <Button disabled={!recording} onClick={stopCapture} icon="stop">
+        <Button disabled={!state.isRecording} onClick={stopCapture} icon="stop">
           Stop
         </Button>
       </NavbarGroup>
 
       <NavbarGroup align={Alignment.RIGHT}>
-        <Button icon="zoom-to-fit" onClick={() => setCropping(true)}>
+        <Button
+          icon="zoom-to-fit"
+          onClick={() => dispatch({ type: "startCropping" })}
+        >
           Crop (PNG Only)
         </Button>
         <NavbarDivider />
@@ -77,12 +75,12 @@ export const Toolbar = ({
             <Menu>
               <MenuItem
                 text="Export to PNG"
-                disabled={converting}
+                disabled={state.isConverting}
                 onClick={onExportPng}
               />
               <MenuItem
                 text="Export to GIF"
-                disabled={converting}
+                disabled={state.isConverting}
                 onClick={onExportGif}
               />
               <MenuDivider />
@@ -90,9 +88,10 @@ export const Toolbar = ({
               <MenuItem text="Image Width">
                 {imageWidths.map((width: number) => (
                   <MenuItem
+                    key={width}
                     text={`${width}`}
-                    icon={gifWidth === width ? "tick" : null}
-                    onClick={() => setGifWidth(width)}
+                    icon={state.gifWidth === width ? "tick" : null}
+                    onClick={() => dispatch({ type: "setGifWidth", width })}
                   />
                 ))}
               </MenuItem>
@@ -101,7 +100,7 @@ export const Toolbar = ({
         >
           <Button icon="export" text="Export..." />
         </Popover>
-        {(png || gif) && (
+        {(state.png || state.gif) && (
           <Popover
             minimal
             content={
@@ -112,15 +111,15 @@ export const Toolbar = ({
                   href={`data:image/png;base64,${base64}`}
                   target="_blank"
                   icon="download"
-                  disabled={!png}
+                  disabled={!state.png}
                 />
                 <MenuItem
                   text="Download GIF"
                   download="screencatcher.gif"
-                  href={gif}
+                  href={state.gif}
                   target="_blank"
                   icon="download"
-                  disabled={!gif}
+                  disabled={!state.gif}
                 />
               </Menu>
             }
@@ -128,7 +127,7 @@ export const Toolbar = ({
             <Button icon="download" text="Download..." />
           </Popover>
         )}
-        {converting && (
+        {state.isConverting && (
           <>
             <NavbarDivider />
             <div style={{ width: "10rem" }}>

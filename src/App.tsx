@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useReducer } from "react";
 import "./App.css";
 import { Button, NonIdealState } from "@blueprintjs/core";
 import { exportPng } from "./export/exportPng";
@@ -7,16 +7,20 @@ import { Toolbar } from "./components/Toolbar";
 import { useContainerDimensions } from "./utils/useContainerDimensions";
 import { Cropper } from "./components/Cropper";
 import { Video } from "./components/Video";
+import { reducer, initialState } from "./state";
 
-async function captureDisplay(displayMediaOptions: any) {
+async function captureDisplay(
+  displayMediaOptions: any
+): Promise<MediaStream | null> {
   let captureStream = null;
 
   try {
-    captureStream = await (navigator.mediaDevices as any).getDisplayMedia(
+    captureStream = await navigator.mediaDevices.getDisplayMedia(
       displayMediaOptions
     );
   } catch (err) {
     console.error("Error: " + err);
+    return null;
   }
   return captureStream;
 }
@@ -29,39 +33,28 @@ const displayMediaOptions = {
 };
 
 const App = () => {
+  const [state, dispatch] = useReducer(reducer, initialState);
   const [mediaRecorder, setMediaRecorder] = useState<any>(null);
-  const [chunks, setChunks] = useState<any[]>([]);
-  const [chunksUrl, setChunksUrl] = useState<string>("");
-  const [recording, setRecording] = useState<boolean>(false);
-  const [converting, setConverting] = useState<boolean>(false);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [stopTime, setStopTime] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(Date.now());
-  const [gifWidth, setGifWidth] = useState<number>(1024);
-  const [screenWidth, setScreenWidth] = useState<number | null>(null);
-  const [screenHeight, setScreenHeight] = useState<number | null>(null);
-  const [gif, setGif] = useState<any>(null);
   const [progress, setProgress] = useState(0);
-  const [png, setPng] = useState<any>(null);
-  const [cropping, setCropping] = useState(false);
-  const [cropDimensions, setCropDimensions] = useState<null | number[]>();
 
   const startCapture = async () => {
     const captureStream = await captureDisplay(displayMediaOptions);
+
+    if (!captureStream) {
+      return;
+    }
+
     const _mediaRecorder = new MediaRecorder(captureStream);
-    setRecording(true);
+    dispatch({ type: "startRecording" });
 
     _mediaRecorder.ondataavailable = (e: any) =>
-      setChunks((existing) => {
-        existing.push(e.data);
-        return existing;
-      });
+      dispatch({ type: "recordChunk", chunk: e.data });
 
     _mediaRecorder.onstop = () => {
-      setRecording(false);
-      setChunksUrl(URL.createObjectURL(chunks[0]));
-      setScreenWidth(captureStream.getVideoTracks()[0].getSettings().width);
-      setScreenHeight(captureStream.getVideoTracks()[0].getSettings().height);
+      dispatch({ type: "stopRecording", captureStream });
     };
 
     _mediaRecorder.start();
@@ -76,6 +69,8 @@ const App = () => {
 
   const videoRef = useRef();
   const { width, height } = useContainerDimensions(videoRef);
+  const screenWidth = state.screenDimensions?.[0];
+  const screenHeight = state.screenDimensions?.[1];
 
   const browserAspectRatio = width / height;
   const videoAspectRatio = screenWidth! / screenHeight!;
@@ -99,17 +94,16 @@ const App = () => {
     videoWidth = scaledWidth;
   }
 
-  console.log(videoLeft, videoTop, videoWidth, videoHeight);
-
   const onExportPng = () => {
     const vid = document.createElement("video");
-    vid.src = chunksUrl;
+    vid.src = state.chunksUrl;
     vid.width = screenWidth!;
     vid.height = screenHeight!;
-    setConverting(true);
+    dispatch({ type: "startExport" });
 
     const scaleFactorX = (1.0 * screenWidth!) / width;
     const scaleFactorY = (1.0 * screenHeight!) / height;
+    const cropDimensions = state.cropDimensions;
 
     exportPng(
       vid,
@@ -121,25 +115,23 @@ const App = () => {
       cropDimensions
         ? Math.round(cropDimensions[3] * scaleFactorY)
         : screenHeight!,
-      cropDimensions ? Math.round(cropDimensions[2] * scaleFactorX) : gifWidth,
+      cropDimensions ? Math.round(cropDimensions[2] * scaleFactorX) : state.gifWidth,
       cropDimensions
         ? Math.round(cropDimensions[3] * scaleFactorY)
-        : (screenHeight! * gifWidth) / screenWidth!,
-      (png: any) => {
-        setConverting(false);
-        setPng(png);
-      }
+        : (screenHeight! * state.gifWidth) / screenWidth!,
+      (png: any) => dispatch({ type: "endExport", png })
     );
   };
 
-  const onCrop = (dimensions: number[]) => {
-    setCropDimensions(dimensions);
-    setCropping(false);
-  };
+  const onCrop = (dimensions: number[]) => dispatch({
+    type: "endCropping",
+    dimensions
+  });
 
-  const onCropCancel = () => {
-    setCropping(false);
-  };
+  const onCropCancel = () =>
+    dispatch({
+      type: "endCropping",
+    });
 
   useEffect(() => {
     setTimeout(() => setCurrentTime(Date.now()), 1000);
@@ -151,19 +143,20 @@ const App = () => {
     1000.0;
 
   const onExportGif = () => {
-    setConverting(true);
+    dispatch({ type: "startExport" });
     exportGif(
-      chunks,
+      state.chunks,
       startTime!,
       stopTime!,
       screenWidth!,
       screenHeight!,
-      (img: any) => {
-        setGif(img);
-        setConverting(false);
-      },
+      (img: any) =>
+        dispatch({
+          type: "endExport",
+          gif: img,
+        }),
       setProgress,
-      gifWidth
+      state.gifWidth
     );
   };
 
@@ -171,17 +164,12 @@ const App = () => {
     <div className="App">
       <main className="bp3-dark">
         <Toolbar
-          converting={converting}
+          state={state}
+          dispatch={dispatch}
           durationSecs={durationSecs}
-          gif={gif}
-          gifWidth={gifWidth}
           onExportGif={onExportGif}
           onExportPng={onExportPng}
-          png={png}
           progress={progress}
-          recording={recording}
-          setCropping={setCropping}
-          setGifWidth={setGifWidth}
           startCapture={startCapture}
           stopCapture={stopCapture}
         />
@@ -215,23 +203,36 @@ const App = () => {
                 pointerEvents: "none",
               }}
             >
-              {cropping && <Cropper onCrop={onCrop} onCancel={onCropCancel} />}
+              {state.isCropping && (
+                <Cropper onCrop={onCrop} onCancel={onCropCancel} />
+              )}
             </div>
-            {chunksUrl ? (
-              <Video chunksUrl={chunksUrl} />
+            {state.chunksUrl ? (
+              <Video chunksUrl={state.chunksUrl} />
             ) : (
               <NonIdealState
-                title="Nothing on tape yet"
-                description="Record something"
-                icon="warning-sign"
+                title={
+                  <>
+                    <p>
+                      screencatcher lets you record your desktop to an animated
+                      GIF or PNG.
+                    </p>
+                  </>
+                }
+                description={
+                  <>
+                    <p>
+                      It works entirely from your browser so doesn't require any
+                      other applications to be installed and doesn't share data
+                      with the outside world.
+                    </p>
+                  </>
+                }
+                icon="mobile-video"
                 action={
-                  !recording ? (
-                    <Button
-                      disabled={recording}
-                      onClick={startCapture}
-                      icon="record"
-                    >
-                      Record
+                  !state.isRecording ? (
+                    <Button onClick={startCapture} icon="record">
+                      Click here to start recording
                     </Button>
                   ) : undefined
                 }

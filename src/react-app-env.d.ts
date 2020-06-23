@@ -11,3 +11,15 @@ declare module 'upng-js' {
 }
 
 declare var MediaRecorder: any;
+
+// See: https://github.com/microsoft/TypeScript/issues/33232
+interface MediaDevices {
+  getDisplayMedia(constraints?: MediaStreamConstraints): Promise<MediaStream>;
+}
+
+// if constraints config still lose some prop, you can define it by yourself also
+interface MediaTrackConstraintSet {
+  displaySurface?: ConstrainDOMString;
+  logicalSurface?: ConstrainBoolean;
+  // more....
+}
