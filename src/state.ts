@@ -9,6 +9,7 @@ export interface State {
   gifWidth: number;
   isCropping: boolean;
   cropDimensions: number[] | null;
+  progress: number;
 }
 
 interface StartRecording {
@@ -41,12 +42,17 @@ interface SetGifWidth {
 }
 
 interface StartCropping {
-    type: "startCropping";
+  type: "startCropping";
 }
 
 interface EndCropping {
-    type: "endCropping";
-    dimensions?: number[];
+  type: "endCropping";
+  dimensions?: number[];
+}
+
+interface SetProgress {
+  type: "setProgress";
+  progress: number;
 }
 
 export type Action =
@@ -58,7 +64,7 @@ export type Action =
   | SetGifWidth
   | StartCropping
   | EndCropping
-  ;
+  | SetProgress;
 
 export const initialState: State = {
   chunks: [],
@@ -71,6 +77,7 @@ export const initialState: State = {
   gifWidth: 1024,
   isCropping: false,
   cropDimensions: null,
+  progress: 0,
 };
 
 export const reducer = (state: State, action: Action): State => {
@@ -105,8 +112,9 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         isConverting: false,
-        png: action.png,
-        gif: action.gif,
+        progress: 0,
+        png: action.png ? action.png : state.png,
+        gif: action.gif ? action.gif : state.gif,
       };
 
     case "setGifWidth":
@@ -116,20 +124,31 @@ export const reducer = (state: State, action: Action): State => {
       };
 
     case "startCropping":
-        return {
-            ...state,
-            isCropping: true
-        };
+      return {
+        ...state,
+        isCropping: true,
+      };
 
     case "endCropping":
+      return {
+        ...state,
+        isCropping: false,
+        cropDimensions: action.dimensions
+          ? action.dimensions
+          : state.cropDimensions,
+      };
+
+      case "setProgress":
         return {
           ...state,
-          isCropping: false,
-          cropDimensions: action.dimensions
-            ? action.dimensions
-            : state.cropDimensions,
+          progress: action.progress,
         };
   }
 
   return state;
 };
+
+export interface Frame {
+  timestamp: number;
+  imageData: ImageData;
+}

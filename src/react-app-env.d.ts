@@ -1,6 +1,6 @@
 /// <reference types="react-scripts" />
 
-declare module 'gifshot' {
+declare module 'gif-encoder' {
   var x: any;
   export = x;
 }
@@ -22,4 +22,12 @@ interface MediaTrackConstraintSet {
   displaySurface?: ConstrainDOMString;
   logicalSurface?: ConstrainBoolean;
   // more....
+}
+
+declare module 'workerize-loader!*' {
+    class WebpackWorker extends Worker {
+        constructor();
+    }
+
+    export = WebpackWorker;
 }

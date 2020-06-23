@@ -21,18 +21,14 @@ export const Toolbar = ({
   startCapture,
   stopCapture,
   durationSecs,
-  onExportGif,
-  onExportPng,
-  progress,
+  onExport,
 }: {
   state: State;
   dispatch: React.Dispatch<Action>;
   startCapture: any;
   stopCapture: any;
   durationSecs: number;
-  onExportGif: any;
-  onExportPng: any;
-  progress: number;
+  onExport: any;
 }) => {
   const base64 = btoa(
     new Uint8Array(state.png).reduce(
@@ -66,7 +62,7 @@ export const Toolbar = ({
           icon="zoom-to-fit"
           onClick={() => dispatch({ type: "startCropping" })}
         >
-          Crop (PNG Only)
+          Crop
         </Button>
         <NavbarDivider />
         <Popover
@@ -76,12 +72,12 @@ export const Toolbar = ({
               <MenuItem
                 text="Export to PNG"
                 disabled={state.isConverting}
-                onClick={onExportPng}
+                onClick={() => onExport("png")}
               />
               <MenuItem
                 text="Export to GIF"
                 disabled={state.isConverting}
-                onClick={onExportGif}
+                onClick={() => onExport("gif")}
               />
               <MenuDivider />
 
@@ -94,6 +90,21 @@ export const Toolbar = ({
                     onClick={() => dispatch({ type: "setGifWidth", width })}
                   />
                 ))}
+                <MenuItem
+                  key={"original"}
+                  text={`Original: ${state.screenDimensions?.[1]}`}
+                  icon={
+                    state.gifWidth === state.screenDimensions?.[1]
+                      ? "tick"
+                      : null
+                  }
+                  onClick={() =>
+                    dispatch({
+                      type: "setGifWidth",
+                      width: state.screenDimensions![1],
+                    })
+                  }
+                />
               </MenuItem>
             </Menu>
           }
@@ -116,7 +127,7 @@ export const Toolbar = ({
                 <MenuItem
                   text="Download GIF"
                   download="screencatcher.gif"
-                  href={state.gif}
+                  href={`data:image/gif;base64,${state.gif}`}
                   target="_blank"
                   icon="download"
                   disabled={!state.gif}
@@ -131,7 +142,7 @@ export const Toolbar = ({
           <>
             <NavbarDivider />
             <div style={{ width: "10rem" }}>
-              <ProgressBar value={progress} />
+              <ProgressBar value={state.progress} />
             </div>
           </>
         )}
