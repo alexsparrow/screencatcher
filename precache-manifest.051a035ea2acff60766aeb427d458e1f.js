@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "4d69857e6550a7b0e84d8c412a21c1e7",
+    "revision": "0320faa85b36b0f209b1fa61b5b7bcc0",
     "url": "/screencatcher/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/screencatcher/static/css/2.2fa635ab.chunk.css"
   },
   {
-    "revision": "7aea123db6df8782cf6e",
+    "revision": "9a5fc879d50a64115b01",
     "url": "/screencatcher/static/css/main.5f361e03.chunk.css"
   },
   {
@@ -20,8 +20,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/screencatcher/static/js/2.dccccd62.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "7aea123db6df8782cf6e",
-    "url": "/screencatcher/static/js/main.f020345b.chunk.js"
+    "revision": "9a5fc879d50a64115b01",
+    "url": "/screencatcher/static/js/main.05442491.chunk.js"
   },
   {
     "revision": "1df1720006bbc4427312",
