@@ -5,10 +5,14 @@ export const Video = ({
   frames,
   width,
   height,
+  displayWidth,
+  displayHeight
 }: {
   frames: Frame[];
   width: number;
   height: number;
+  displayWidth: number;
+  displayHeight: number;
 }) => {
   const canvasRef = React.useRef(null);
 
@@ -48,9 +52,9 @@ export const Video = ({
       height={height}
       style={{
         maxHeight: "100%",
-        // height: "100%",
+        height: displayHeight,
         maxWidth: "100%",
-        width: "100%",
+        width: displayWidth,
         margin: "auto"
       }}
     />

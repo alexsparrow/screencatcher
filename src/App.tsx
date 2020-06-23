@@ -244,6 +244,8 @@ const App = () => {
                 frames={frames.current}
                 width={screenWidth!}
                 height={screenHeight!}
+                displayWidth={videoWidth}
+                displayHeight={videoHeight}
               />
             ) : (
               <NonIdealState
