@@ -10,6 +10,7 @@ export interface State {
   isCropping: boolean;
   cropDimensions: number[] | null;
   progress: number;
+  hasData: boolean;
 }
 
 interface StartRecording {
@@ -78,6 +79,7 @@ export const initialState: State = {
   isCropping: false,
   cropDimensions: null,
   progress: 0,
+  hasData: false
 };
 
 export const reducer = (state: State, action: Action): State => {
@@ -86,6 +88,7 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         isRecording: true,
+        hasData: true
       };
 
     case "recordChunk":

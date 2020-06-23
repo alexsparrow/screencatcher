@@ -37,10 +37,20 @@ const App = () => {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [stopTime, setStopTime] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(Date.now());
-  // const [progress, setProgress] = useState(0);
 
   const frames = useRef<Frame[]>([]);
   const frameTimer = useRef<NodeJS.Timeout | null>(null);
+
+  React.useEffect(() => {
+    if (!state.hasData) return;
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+        return "You haven't saved your recording. Are you sure you want to leave?";
+    };
+    window.onbeforeunload = handleBeforeUnload;
+    return () => {
+      window.onbeforeunload = null;
+    }
+  }, [state]);
 
   const startCapture = async () => {
     const captureStream = await captureDisplay(displayMediaOptions);
@@ -142,19 +152,19 @@ const App = () => {
 
     const x = cropDimensions ? Math.round(cropDimensions[0] * scaleFactorX) : 0;
     const y = cropDimensions ? Math.round(cropDimensions[1] * scaleFactorY) : 0;
-      const sourceWidth = cropDimensions
-        ? Math.round(cropDimensions[2] * scaleFactorX)
-        : screenWidth!;
-     const sourceHeight = cropDimensions
-        ? Math.round(cropDimensions[3] * scaleFactorY)
-        : screenHeight!;
-     const targetWidth = cropDimensions
-        ? Math.round(cropDimensions[2] * scaleFactorX)
-        : state.gifWidth;
-        const targetHeight = cropDimensions
-        ? Math.round(cropDimensions[3] * scaleFactorY)
-        : (screenHeight! * state.gifWidth) / screenWidth!;
- 
+    const sourceWidth = cropDimensions
+      ? Math.round(cropDimensions[2] * scaleFactorX)
+      : screenWidth!;
+    const sourceHeight = cropDimensions
+      ? Math.round(cropDimensions[3] * scaleFactorY)
+      : screenHeight!;
+    const targetWidth = cropDimensions
+      ? Math.round(cropDimensions[2] * scaleFactorX)
+      : state.gifWidth;
+    const targetHeight = cropDimensions
+      ? Math.round(cropDimensions[3] * scaleFactorY)
+      : (screenHeight! * state.gifWidth) / screenWidth!;
+
     exportImage(
       frames.current,
       screenWidth!,
