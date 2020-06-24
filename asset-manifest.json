@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/screencatcher/static/css/main.5f361e03.chunk.css",
-    "main.js": "/screencatcher/static/js/main.3eff0729.chunk.js",
-    "main.js.map": "/screencatcher/static/js/main.3eff0729.chunk.js.map",
+    "main.js": "/screencatcher/static/js/main.92665c4c.chunk.js",
+    "main.js.map": "/screencatcher/static/js/main.92665c4c.chunk.js.map",
     "runtime-main.js": "/screencatcher/static/js/runtime-main.91b547df.js",
     "runtime-main.js.map": "/screencatcher/static/js/runtime-main.91b547df.js.map",
     "static/css/2.2fa635ab.chunk.css": "/screencatcher/static/css/2.2fa635ab.chunk.css",
     "static/js/2.12d69a30.chunk.js": "/screencatcher/static/js/2.12d69a30.chunk.js",
     "static/js/2.12d69a30.chunk.js.map": "/screencatcher/static/js/2.12d69a30.chunk.js.map",
     "index.html": "/screencatcher/index.html",
-    "precache-manifest.d39c3c37bcc268512e9557faf2e53181.js": "/screencatcher/precache-manifest.d39c3c37bcc268512e9557faf2e53181.js",
+    "precache-manifest.e47f79c7bc16e3d88534029a43a4240b.js": "/screencatcher/precache-manifest.e47f79c7bc16e3d88534029a43a4240b.js",
     "service-worker.js": "/screencatcher/service-worker.js",
     "static/css/2.2fa635ab.chunk.css.map": "/screencatcher/static/css/2.2fa635ab.chunk.css.map",
     "static/css/main.5f361e03.chunk.css.map": "/screencatcher/static/css/main.5f361e03.chunk.css.map",
@@ -21,6 +21,6 @@
     "static/css/2.2fa635ab.chunk.css",
     "static/js/2.12d69a30.chunk.js",
     "static/css/main.5f361e03.chunk.css",
-    "static/js/main.3eff0729.chunk.js"
+    "static/js/main.92665c4c.chunk.js"
   ]
 }
