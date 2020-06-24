@@ -47,13 +47,20 @@ export const Toolbar = ({
         </NavbarHeading>
         <Button
           disabled={state.isRecording}
-          onClick={startCapture}
+          onClick={() => startCapture(0)}
           icon="record"
         >
           Record
         </Button>
         <Button disabled={!state.isRecording} onClick={stopCapture} icon="stop">
           Stop
+        </Button>
+        <Button
+          disabled={state.isRecording}
+          onClick={() => startCapture(1)}
+          icon="camera"
+        >
+          Screenshot
         </Button>
       </NavbarGroup>
 
@@ -90,21 +97,23 @@ export const Toolbar = ({
                     onClick={() => dispatch({ type: "setGifWidth", width })}
                   />
                 ))}
-                <MenuItem
-                  key={"original"}
-                  text={`Original: ${state.screenDimensions?.[1]}`}
-                  icon={
-                    state.gifWidth === state.screenDimensions?.[1]
-                      ? "tick"
-                      : null
-                  }
-                  onClick={() =>
-                    dispatch({
-                      type: "setGifWidth",
-                      width: state.screenDimensions![1],
-                    })
-                  }
-                />
+                {state.screenDimensions && (
+                  <MenuItem
+                    key={"original"}
+                    text={`Original: ${state.screenDimensions?.[0]}`}
+                    icon={
+                      state.gifWidth === state.screenDimensions?.[0]
+                        ? "tick"
+                        : null
+                    }
+                    onClick={() =>
+                      dispatch({
+                        type: "setGifWidth",
+                        width: state.screenDimensions![0],
+                      })
+                    }
+                  />
+                )}
               </MenuItem>
             </Menu>
           }

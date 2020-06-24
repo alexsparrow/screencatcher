@@ -33,28 +33,27 @@ const displayMediaOptions = {
 
 const App = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [mediaRecorder, setMediaRecorder] = useState<any>(null);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [stopTime, setStopTime] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(Date.now());
 
   const frames = useRef<Frame[]>([]);
   const frameTimer = useRef<NodeJS.Timeout | null>(null);
+  const mediaRecorder = useRef<typeof MediaRecorder>();
 
   React.useEffect(() => {
     if (!state.hasData) return;
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-        return "You haven't saved your recording. Are you sure you want to leave?";
+      return "You haven't saved your recording. Are you sure you want to leave?";
     };
     window.onbeforeunload = handleBeforeUnload;
     return () => {
       window.onbeforeunload = null;
-    }
+    };
   }, [state]);
 
-  const startCapture = async () => {
+  const startCapture = async (numFrames: number) => {
     const captureStream = await captureDisplay(displayMediaOptions);
-
     const video = document.createElement("video");
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
@@ -74,9 +73,6 @@ const App = () => {
           canvas.height = video.videoHeight;
         }
 
-        console.log(video.videoWidth);
-        console.log(video.videoHeight);
-
         context?.drawImage(video, 0, 0);
 
         frames.current.push({
@@ -88,30 +84,34 @@ const App = () => {
             video.videoHeight
           )!,
         });
+
+        if (frames.current.length === numFrames) {
+          stopCapture();
+        }
       }, 100);
     };
     video.play();
 
-    const _mediaRecorder = new MediaRecorder(captureStream);
+    mediaRecorder.current = new MediaRecorder(captureStream);
     dispatch({ type: "startRecording" });
 
-    _mediaRecorder.ondataavailable = (e: any) =>
+    mediaRecorder.current.ondataavailable = (e: any) =>
       dispatch({ type: "recordChunk", chunk: e.data });
 
-    _mediaRecorder.onstop = () => {
+    mediaRecorder.current.onstop = () => {
       dispatch({ type: "stopRecording", captureStream });
+      captureStream.getVideoTracks().forEach((track) => track.stop());
     };
 
-    _mediaRecorder.start();
+    mediaRecorder.current.start();
     setStartTime(Date.now());
-    setMediaRecorder(_mediaRecorder);
   };
 
   const stopCapture = async () => {
-    mediaRecorder.stop();
+    if (mediaRecorder.current) {
+      mediaRecorder.current.stop();
+    }
     setStopTime(Date.now());
-
-    console.log(frames.current);
     clearInterval(frameTimer.current!);
   };
 
@@ -177,7 +177,7 @@ const App = () => {
       targetHeight,
       (progress: number) => dispatch({ type: "setProgress", progress }),
       (png: any) => dispatch({ type: "endExport", [type]: png }),
-      type == "gif"
+      type === "gif"
         ? new GIFExporter(targetWidth, targetHeight)
         : new PNGExporter(targetWidth, targetHeight)
     );
@@ -279,7 +279,7 @@ const App = () => {
                 icon="mobile-video"
                 action={
                   !state.isRecording ? (
-                    <Button onClick={startCapture} icon="record">
+                    <Button onClick={() => startCapture(0)} icon="record">
                       Click here to start recording
                     </Button>
                   ) : undefined
