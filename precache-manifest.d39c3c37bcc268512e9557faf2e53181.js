@@ -1,27 +1,27 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "ca0237ac1956ea6f90ce41d8258a2380",
+    "revision": "86633f6eee4b700e87704ed43afcd80d",
     "url": "/screencatcher/index.html"
   },
   {
-    "revision": "56cacc3e80c504307ff2",
+    "revision": "836ba2b11e66561a037c",
     "url": "/screencatcher/static/css/2.2fa635ab.chunk.css"
   },
   {
-    "revision": "b197326571ce8a3db865",
+    "revision": "97c0f675677d2cf45d18",
     "url": "/screencatcher/static/css/main.5f361e03.chunk.css"
   },
   {
-    "revision": "56cacc3e80c504307ff2",
-    "url": "/screencatcher/static/js/2.dccccd62.chunk.js"
+    "revision": "836ba2b11e66561a037c",
+    "url": "/screencatcher/static/js/2.12d69a30.chunk.js"
   },
   {
     "revision": "0cdc11a8c3bc4cb1ce89dd75fcda34cd",
-    "url": "/screencatcher/static/js/2.dccccd62.chunk.js.LICENSE.txt"
+    "url": "/screencatcher/static/js/2.12d69a30.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "b197326571ce8a3db865",
-    "url": "/screencatcher/static/js/main.1fa0cde5.chunk.js"
+    "revision": "97c0f675677d2cf45d18",
+    "url": "/screencatcher/static/js/main.3eff0729.chunk.js"
   },
   {
     "revision": "1df1720006bbc4427312",
