@@ -144,7 +144,6 @@ const App = () => {
 
   const onExport = (type: "gif" | "png") => {
     dispatch({ type: "startExport" });
-    console.log(width, height);
 
     const scaleFactorX = (1.0 * screenWidth!) / videoWidth;
     const scaleFactorY = (1.0 * screenHeight!) / videoHeight;
